@@ -1,0 +1,14 @@
+# IDE ignores
+/.idea
+*.iml
+
+# sbt project structure ignore
+/app/target
+/target
+/project/target
+/project/project
+/docs
+
+# Java/Scala Ignore
+*.class
+*.log
