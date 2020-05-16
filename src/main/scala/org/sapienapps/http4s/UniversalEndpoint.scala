@@ -1,29 +1,20 @@
 package org.sapienapps.http4s
 
+import cats.effect.Sync
 import cats.implicits._
-import cats.{Defer, MonadError}
 import io.circe.Encoder
 import org.http4s.{EntityDecoder, HttpRoutes, Request}
 
-trait UniversalEndpoint[F[_], K, T, Error, Params, U]
+case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, U]
+(paramMapper: (Request[F]) => Either[String, Map[Params, _]],
+ id: (String) => K)
+(implicit ed: EntityDecoder[F, T], encoder: Encoder[T])
   extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Params, U]
     with ServiceEffects[F] {
 
-  //implicit def M: Monad[F]
+  def toParamMap(request: Request[F]): Either[String, Map[Params, _]] = paramMapper(request)
 
-  implicit def A: App
-
-  implicit def Error: MonadError[F, Throwable]
-
-  implicit def entityDecoder: EntityDecoder[F, T]
-
-  implicit def encoder: Encoder[T]
-
-  implicit def defer: Defer[F]
-
-  def toParamMap(request: Request[F]): Either[String, Map[Params, _]]
-
-  def toId(request: String): K
+  def toId(request: String): K = id(request)
 
   def create(service: Service): HttpRoutes[F] = {
     HttpRoutes.of[F] {
@@ -113,3 +104,12 @@ trait UniversalEndpoint[F[_], K, T, Error, Params, U]
   case class Count(count: Int)
 
 }
+
+/*
+object StringUniversalEndpoint {
+
+  def endpoints[F[_] : Sync, T](service: CrudService[F, String, T, Any, Any, Any])
+                               (implicit ed: EntityDecoder[F, T], e: Encoder[T]): HttpRoutes[F] =
+    new StringUniversalEndpoint[F, T](ed, e).endpoints(service)
+}
+*/
