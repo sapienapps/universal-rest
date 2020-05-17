@@ -1,6 +1,7 @@
 package org.sapienapps.http4s
 
 import cats.data.EitherT
+import org.sapienapps.http4s.session.Session
 
 trait CrudRepository[F[_], K, T, Error, Params, U] {
 
