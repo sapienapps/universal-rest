@@ -1,9 +1,9 @@
-package org.sapienapps.http4s
+package com.sapienapps.http4s
 
 import cats.Monad
 import cats.data.EitherT
 import org.http4s.dsl.Http4sDsl
-import org.sapienapps.http4s.session.Session
+import com.sapienapps.http4s.session.Session
 
 trait CrudService[F[_], K, T, Error, Params, U] extends Http4sDsl[F] {
 

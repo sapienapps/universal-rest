@@ -1,8 +1,8 @@
-package org.sapienapps.http4s
+package com.sapienapps.http4s
 
 import cats.Applicative
 import cats.data.EitherT
-import org.sapienapps.http4s.session.Session
+import com.sapienapps.http4s.session.Session
 
 case class TestRepo[F[_] : Applicative, Params, U]() extends CrudRepository[F, Int, String, String, Params, U] {
   override def create(entity: String)(implicit session: Session[Params, U]): EitherT[F, String, String] = {

@@ -1,8 +1,8 @@
-package org.sapienapps.http4s
+package com.sapienapps.http4s
 
 import cats.Monad
 import cats.data.EitherT
-import org.sapienapps.http4s.session.Session
+import com.sapienapps.http4s.session.Session
 
 case class UniversalService[F[_], K, T, Error, Params, U](repo: CrudRepository[F, K, T, Error, Params, U])
   extends CrudService[F, K, T, Error, Params, U] {

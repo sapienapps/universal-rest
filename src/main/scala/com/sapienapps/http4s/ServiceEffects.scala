@@ -1,4 +1,4 @@
-package org.sapienapps.http4s
+package com.sapienapps.http4s
 
 import cats.implicits._
 import cats.{Applicative, Monad, MonadError, data}

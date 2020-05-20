@@ -1,4 +1,4 @@
-package org.sapienapps.http4s
+package com.sapienapps.http4s
 
 import org.http4s.Request
 import org.http4s.dsl.Http4sDsl

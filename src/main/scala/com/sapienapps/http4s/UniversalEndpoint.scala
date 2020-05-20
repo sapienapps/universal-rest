@@ -1,10 +1,10 @@
-package org.sapienapps.http4s
+package com.sapienapps.http4s
 
 import cats.effect.Sync
 import cats.implicits._
 import io.circe.Encoder
 import org.http4s.{EntityDecoder, HttpRoutes, Request}
-import org.sapienapps.http4s.session.Session
+import com.sapienapps.http4s.session.Session
 
 case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, U]
 (paramMapper: (Request[F]) => Either[String, Map[Params, _]],

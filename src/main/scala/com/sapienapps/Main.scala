@@ -1,7 +1,7 @@
-package org.sapienapps
+package com.sapienapps
 
 import cats.effect.{ExitCode, IO, IOApp}
-import org.sapienapps.http4s.Server
+import com.sapienapps.http4s.Server
 
 object Main extends IOApp {
 

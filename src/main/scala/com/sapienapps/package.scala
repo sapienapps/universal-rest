@@ -1,4 +1,4 @@
-package org
+package com
 
 package object sapienapps {
 
