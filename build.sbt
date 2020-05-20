@@ -11,8 +11,6 @@ libraryDependencies ++= Seq(
   "org.http4s"          %% "http4s-blaze-client" % Http4sVersion,
   "org.http4s"          %% "http4s-circe"        % Http4sVersion,
   "org.http4s"          %% "http4s-dsl"          % Http4sVersion,
-  //"org.http4s"          %% "http4s-twirl"        % Http4sVersion,
-  //"org.http4s"          %% "http4s-scala-xml"    % Http4sVersion,
 )
 
 scalacOptions ++= Seq(
