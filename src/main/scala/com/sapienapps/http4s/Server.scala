@@ -2,20 +2,16 @@ package com.sapienapps.http4s
 
 import cats.effect.{ConcurrentEffect, ContextShift, Timer}
 import fs2.Stream
-import io.circe.Json
-import org.http4s.circe.{jsonOf, jsonEncoderOf}
+import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request}
-import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext.global
 
 case class Server() {
-
-
 
   def stream[F[_] : ConcurrentEffect](endpoints: List[(String, HttpRoutes[F])])
                                      (implicit T: Timer[F], C: ContextShift[F]): Stream[F, Nothing] = {

@@ -3,16 +3,16 @@ package com.sapienapps.http4s
 import cats.effect.Sync
 import cats.implicits._
 import io.circe.Encoder
-import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request}
+import org.http4s.{EntityDecoder, HttpRoutes, Request}
 import org.log4s.{Logger, getLogger}
 
 import scala.util.Try
 
 case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
-(paramMapper: (Request[F]) => Either[Error, Map[Params, _]],
+(toParams: (Request[F]) => Either[String, Map[Params, _]],
  toSession: (Map[Params, _]) => SessionType,
  toId: (String) => K)
-(implicit ed: EntityDecoder[F, T], errD: EntityEncoder[F, Error], encoder: Encoder[T])
+(implicit ed: EntityDecoder[F, T], encoder: Encoder[T])
   extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Params, SessionType]
     with ServiceEffects[F] {
 
@@ -22,7 +22,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
     HttpRoutes.of[F] {
       case req@POST -> Root =>
         Try {
-          paramMapper(req) match {
+          toParams(req) match {
             case Left(e) => BadRequest(e)
             case Right(params) =>
               jsonRequest[T](req, e => {
@@ -43,7 +43,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
     HttpRoutes.of[F] {
       case req@GET -> Root / id =>
         Try {
-          paramMapper(req) match {
+          toParams(req) match {
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)
@@ -62,7 +62,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
     HttpRoutes.of[F] {
       case req@GET -> Root =>
         Try {
-          paramMapper(req) match {
+          toParams(req) match {
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)
@@ -81,7 +81,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
     HttpRoutes.of[F] {
       case req@PUT -> Root =>
         Try {
-          paramMapper(req) match {
+          toParams(req) match {
             case Left(e) => BadRequest(e)
             case Right(params) =>
               jsonRequest[T](req, e => {
@@ -102,7 +102,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
     HttpRoutes.of[F] {
       case req@DELETE -> Root / id =>
         Try {
-          paramMapper(req) match {
+          toParams(req) match {
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)
@@ -121,7 +121,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
     HttpRoutes.of[F] {
       case req@GET -> Root / "count" =>
         Try {
-          paramMapper(req) match {
+          toParams(req) match {
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)

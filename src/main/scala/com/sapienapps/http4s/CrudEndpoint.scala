@@ -1,8 +1,6 @@
 package com.sapienapps.http4s
 
-import org.http4s.Request
 import org.http4s.dsl.Http4sDsl
-
 
 trait CrudEndpoint[F[_], K, T, Endpoint, Error, Params, SessionType] extends Http4sDsl[F] {
 
