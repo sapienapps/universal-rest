@@ -3,30 +3,38 @@ package com.sapienapps.http4s
 import cats.effect.Sync
 import cats.implicits._
 import io.circe.Encoder
-import org.http4s.{EntityDecoder, HttpRoutes, Request}
-import com.sapienapps.http4s.session.Session
+import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request}
+import org.log4s.{Logger, getLogger}
 
-case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, U]
-(paramMapper: (Request[F]) => Either[String, Map[Params, _]],
- id: (String) => K)
-(implicit ed: EntityDecoder[F, T], encoder: Encoder[T])
-  extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Params, U]
+import scala.util.Try
+
+case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
+(paramMapper: (Request[F]) => Either[Error, Map[Params, _]],
+ toSession: (Map[Params, _]) => SessionType,
+ toId: (String) => K)
+(implicit ed: EntityDecoder[F, T], errD: EntityEncoder[F, Error], encoder: Encoder[T])
+  extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Params, SessionType]
     with ServiceEffects[F] {
 
-  def toParamMap(request: Request[F]): Either[String, Map[Params, _]] = paramMapper(request)
-
-  def toId(request: String): K = id(request)
+  private val log: Logger = getLogger
 
   def create(service: Service): HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req@POST -> Root =>
-        toParamMap(req) match {
-          case Left(e) => BadRequest(e)
-          case Right(params) =>
-            jsonRequest[T](req, e => {
-              implicit val session: Session[Params, U] = Session(params)
-              service.create(e).value.flatMap(f => jsonResponse(f))
-            })
+        Try {
+          paramMapper(req) match {
+            case Left(e) => BadRequest(e)
+            case Right(params) =>
+              jsonRequest[T](req, e => {
+                implicit val session: SessionType = toSession(params)
+                service.create(e).value.flatMap(f => jsonResponse(f))
+              })
+          }
+        }.toEither match {
+          case Left(err) =>
+            log.error(err)("Unhandled Error")
+            BadRequest("Unknown Error")
+          case Right(r) => r
         }
     }
   }
@@ -34,11 +42,18 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, U]
   def get(service: Service): HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req@GET -> Root / id =>
-        toParamMap(req) match {
-          case Left(e) => BadRequest(e)
-          case Right(params) =>
-            implicit val session: Session[Params, U] = Session(params)
-            service.get(toId(id)).value.flatMap(f => jsonResponse(f))
+        Try {
+          paramMapper(req) match {
+            case Left(e) => BadRequest(e)
+            case Right(params) =>
+              implicit val session: SessionType = toSession(params)
+              service.get(toId(id)).value.flatMap(f => jsonResponse(f))
+          }
+        }.toEither match {
+          case Left(err) =>
+            log.error(err)("Unhandled Error")
+            BadRequest("Unknown Error")
+          case Right(r) => r
         }
     }
   }
@@ -46,11 +61,18 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, U]
   def list(service: Service): HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req@GET -> Root =>
-        toParamMap(req) match {
-          case Left(e) => BadRequest(e)
-          case Right(params) =>
-            implicit val session: Session[Params, U] = Session(params)
-            service.list().value.flatMap(f => jsonResponse(f))
+        Try {
+          paramMapper(req) match {
+            case Left(e) => BadRequest(e)
+            case Right(params) =>
+              implicit val session: SessionType = toSession(params)
+              service.list().value.flatMap(f => jsonResponse(f))
+          }
+        }.toEither match {
+          case Left(err) =>
+            log.error(err)("Unhandled Error")
+            BadRequest("Unknown Error")
+          case Right(r) => r
         }
     }
   }
@@ -58,13 +80,20 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, U]
   def update(service: Service): HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req@PUT -> Root =>
-        toParamMap(req) match {
-          case Left(e) => BadRequest(e)
-          case Right(params) =>
-            jsonRequest[T](req, e => {
-              implicit val session: Session[Params, U] = Session(params)
-              service.update(e).value.flatMap(f => jsonResponse(f))
-            })
+        Try {
+          paramMapper(req) match {
+            case Left(e) => BadRequest(e)
+            case Right(params) =>
+              jsonRequest[T](req, e => {
+                implicit val session: SessionType = toSession(params)
+                service.update(e).value.flatMap(f => jsonResponse(f))
+              })
+          }
+        }.toEither match {
+          case Left(err) =>
+            log.error(err)("Unhandled Error")
+            BadRequest("Unknown Error")
+          case Right(r) => r
         }
     }
   }
@@ -72,11 +101,18 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, U]
   def delete(service: Service): HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req@DELETE -> Root / id =>
-        toParamMap(req) match {
-          case Left(e) => BadRequest(e)
-          case Right(params) =>
-            implicit val session: Session[Params, U] = Session(params)
-            service.delete(toId(id)).value.flatMap(f => jsonResponse(f))
+        Try {
+          paramMapper(req) match {
+            case Left(e) => BadRequest(e)
+            case Right(params) =>
+              implicit val session: SessionType = toSession(params)
+              service.delete(toId(id)).value.flatMap(f => jsonResponse(f))
+          }
+        }.toEither match {
+          case Left(err) =>
+            log.error(err)("Unhandled Error")
+            BadRequest("Unknown Error")
+          case Right(r) => r
         }
     }
   }
@@ -84,11 +120,18 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, U]
   def count(service: Service): HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req@GET -> Root / "count" =>
-        toParamMap(req) match {
-          case Left(e) => BadRequest(e)
-          case Right(params) =>
-            implicit val session: Session[Params, U] = Session(params)
-            service.size.value.flatMap(f => jsonResponse(f))
+        Try {
+          paramMapper(req) match {
+            case Left(e) => BadRequest(e)
+            case Right(params) =>
+              implicit val session: SessionType = toSession(params)
+              service.size.value.flatMap(f => jsonResponse(f))
+          }
+        }.toEither match {
+          case Left(err) =>
+            log.error(err)("Unhandled Error")
+            BadRequest("Unknown Error")
+          case Right(r) => r
         }
     }
   }

@@ -2,42 +2,42 @@ package com.sapienapps.http4s
 
 import cats.Applicative
 import cats.data.EitherT
-import com.sapienapps.http4s.session.Session
 
-case class TestRepo[F[_] : Applicative, Params, U]() extends CrudRepository[F, Int, String, String, Params, U] {
-  override def create(entity: String)(implicit session: Session[Params, U]): EitherT[F, String, String] = {
+case class TestRepo[F[_] : Applicative, Params]() extends CrudRepository[F, Int, String, String, String] {
+
+  override def create(entity: String)(implicit session: String): EitherT[F, String, String] = {
     entity match {
-      case "" => EitherT.fromEither(Left("Create Error"))
-      case _ => EitherT.fromEither(Right("Create"))
+      case "" => EitherT.fromEither(Left(s"Create Error"))
+      case _ => EitherT.fromEither(Right(s"Create ${entity}"))
     }
   }
 
-  override def get(id: Int)(implicit session: Session[Params, U]): EitherT[F, String, String] = {
+  override def get(id: Int)(implicit session: String): EitherT[F, String, String] = {
     id match {
-      case 0 => EitherT.fromEither(Left("Get Error"))
-      case _ => EitherT.fromEither(Right("Get"))
+      case 0 => EitherT.fromEither(Left(s"Get Error $id"))
+      case _ => EitherT.fromEither(Right(s"Get $id"))
     }
   }
 
-  override def delete(id: Int)(implicit session: Session[Params, U]): EitherT[F, String, String] = {
+  override def delete(id: Int)(implicit session: String): EitherT[F, String, String] = {
     id match {
-      case 0 => EitherT.fromEither(Left("Delete Error"))
-      case _ => EitherT.fromEither(Right("get"))
+      case 0 => EitherT.fromEither(Left(s"Delete Error $id"))
+      case _ => EitherT.fromEither(Right(s"Delete $id"))
     }
   }
 
-  override def update(entity: String)(implicit session: Session[Params, U]): EitherT[F, String, String] = {
+  override def update(entity: String)(implicit session: String): EitherT[F, String, String] = {
     entity match {
-      case "" => EitherT.fromEither(Left("Update Error"))
-      case _ => EitherT.fromEither(Right("Update"))
+      case "" => EitherT.fromEither(Left(s"Update Error"))
+      case _ => EitherT.fromEither(Right(s"Update ${entity}"))
     }
   }
 
-  override def list()(implicit session: Session[Params, U]): EitherT[F, String, List[String]] = {
+  override def list()(implicit session: String): EitherT[F, String, List[String]] = {
     EitherT.fromEither(Right(List("Item0", "Item1")))
   }
 
-  override def size()(implicit session: Session[Params, U]): EitherT[F, String, Int] = {
+  override def size()(implicit session: String): EitherT[F, String, Int] = {
     EitherT.fromEither(Right(2))
   }
 

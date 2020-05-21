@@ -4,11 +4,9 @@ import org.http4s.Request
 import org.http4s.dsl.Http4sDsl
 
 
-trait CrudEndpoint[F[_], K, T, Endpoint, Error, Params, U] extends Http4sDsl[F] {
+trait CrudEndpoint[F[_], K, T, Endpoint, Error, Params, SessionType] extends Http4sDsl[F] {
 
-  type Service = CrudService[F, K, T, Error, Params, U]
-
-  def toParamMap(request: Request[F]): Either[String, Map[Params, _]]
+  type Service = CrudService[F, K, T, Error, SessionType]
 
   def create(service: Service): Endpoint
 
