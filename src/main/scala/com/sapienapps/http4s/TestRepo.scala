@@ -33,12 +33,11 @@ case class TestRepo[F[_] : Applicative, Params]() extends CrudRepository[F, Int,
     }
   }
 
-  override def list()(implicit session: String): EitherT[F, String, List[String]] = {
-    EitherT.fromEither(Right(List("Item0", "Item1")))
+  override def collection(isCount: Boolean)(implicit session: String): EitherT[F, String, DataResult[String]] = {
+    if (isCount) {
+      EitherT.fromEither(Right(CountResult(2)))
+    } else {
+      EitherT.fromEither(Right(SeqResult(List("Item0", "Item1"))))
+    }
   }
-
-  override def size()(implicit session: String): EitherT[F, String, Int] = {
-    EitherT.fromEither(Right(2))
-  }
-
 }

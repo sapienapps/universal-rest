@@ -1,5 +1,6 @@
 package com.sapienapps.http4s
 
+import cats.Applicative
 import cats.data.EitherT
 
 trait CrudRepository[F[_], K, T, Error, SessionType] {
@@ -12,9 +13,17 @@ trait CrudRepository[F[_], K, T, Error, SessionType] {
 
   def update(entity: T)(implicit session: SessionType): EitherT[F, Error, T]
 
-  // TODO add to remaining Repos: def collection(isCount: Boolean)(implicit session: Session): DataResult[T]
+  def collection(isCount: Boolean)(implicit session: SessionType): EitherT[F, Error, DataResult[T]]
 
-  def list()(implicit session: SessionType): EitherT[F, Error, List[T]]
+  def list()(implicit session: SessionType, F: Applicative[F]): EitherT[F, Error, Seq[T]] =
+    collection(isCount = false).map {
+      case CountResult(_) => List[T]()
+      case SeqResult(v) => v
+    }
 
-  def size()(implicit session: SessionType): EitherT[F, Error, Int]
+  def size()(implicit session: SessionType, F: Applicative[F]): EitherT[F, Error, Int] =
+    collection(isCount = false).map {
+      case CountResult(v) => v
+      case SeqResult(_)  => 0
+    }
 }

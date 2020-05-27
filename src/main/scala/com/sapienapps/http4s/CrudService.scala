@@ -14,7 +14,7 @@ trait CrudService[F[_], K, T, Error, SessionType] extends Http4sDsl[F] {
 
   def delete(id: K)(implicit M: Monad[F], session: SessionType): EitherT[F, Error, T]
 
-  def list()(implicit M: Monad[F], session: SessionType): EitherT[F, Error, List[T]]
+  def list()(implicit M: Monad[F], session: SessionType): EitherT[F, Error, Seq[T]]
 
   def size()(implicit M: Monad[F], session: SessionType): EitherT[F, Error, Int]
 
