@@ -37,7 +37,7 @@ case class TestRepo[F[_] : Applicative, Params]() extends CrudRepository[F, Int,
     if (isCount) {
       EitherT.fromEither(Right(CountResult(2)))
     } else {
-      EitherT.fromEither(Right(SeqResult(List("Item0", "Item1"))))
+      EitherT.fromEither(Right(ItrResult(List("Item0", "Item1"))))
     }
   }
 }

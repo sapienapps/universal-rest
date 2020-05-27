@@ -15,15 +15,15 @@ trait CrudRepository[F[_], K, T, Error, SessionType] {
 
   def collection(isCount: Boolean)(implicit session: SessionType): EitherT[F, Error, DataResult[T]]
 
-  def list()(implicit session: SessionType, F: Applicative[F]): EitherT[F, Error, Seq[T]] =
+  def list()(implicit session: SessionType, F: Applicative[F]): EitherT[F, Error, Iterable[T]] =
     collection(isCount = false).map {
       case CountResult(_) => List[T]()
-      case SeqResult(v) => v
+      case ItrResult(v) => v
     }
 
   def size()(implicit session: SessionType, F: Applicative[F]): EitherT[F, Error, Int] =
     collection(isCount = false).map {
       case CountResult(v) => v
-      case SeqResult(_)  => 0
+      case ItrResult(_)  => 0
     }
 }

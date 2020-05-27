@@ -30,7 +30,7 @@ case class UniversalService[F[_], K, T, Error, SessionType](repo: CrudRepository
     } yield deleted
   }
 
-  def list()(implicit M: Monad[F], session: SessionType): EitherT[F, Error, Seq[T]] = {
+  def list()(implicit M: Monad[F], session: SessionType): EitherT[F, Error, Iterable[T]] = {
     for {
       list <- repo.list()
     } yield list
