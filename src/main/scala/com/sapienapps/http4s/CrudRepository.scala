@@ -22,7 +22,7 @@ trait CrudRepository[F[_], K, T, Error, SessionType] {
     }
 
   def size()(implicit session: SessionType, F: Applicative[F]): EitherT[F, Error, Int] =
-    collection(isCount = false).map {
+    collection(isCount = true).map {
       case CountResult(v) => v
       case ItrResult(_)  => 0
     }
