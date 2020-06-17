@@ -5,9 +5,10 @@ import fs2.Stream
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits._
+import org.http4s.Status.BadRequest
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request}
+import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request, Status}
 
 import scala.concurrent.ExecutionContext.global
 
@@ -23,7 +24,11 @@ case class Server() {
     val toId = (id: String) => Integer.parseInt(id)
 
     val endpoint = List(
-      "test" -> UniversalEndpoint(toParams, toSession, toId).endpoints(UniversalService(TestRepo[F,String]()))
+      "test" -> UniversalEndpoint(
+        toParams,
+        toSession,
+        TestErrorHandler[F](),
+        toId).endpoints(UniversalService(TestRepo[F, String]()))
     )
 
     for {

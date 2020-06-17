@@ -2,7 +2,7 @@ package com.sapienapps.http4s.auth
 
 import cats.effect.Sync
 import cats.implicits._
-import com.sapienapps.http4s.{CrudEndpoint, ServiceEffects}
+import com.sapienapps.http4s.{CrudEndpoint, ErrorHandler, ServiceEffects}
 import io.circe.Encoder
 import org.http4s.{EntityDecoder, HttpRoutes}
 import org.log4s.{Logger, getLogger}
@@ -13,6 +13,7 @@ import scala.util.Try
 case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, SessionType]
 (toParams: (SecuredRequest[F, User, AugmentedJWT[Auth, String]]) => Either[String, Map[Params, _]],
  toSession: (Map[Params, _], User) => SessionType,
+ errorHandler: ErrorHandler[F, Error],
  toId: (String) => K)
 (implicit ed: EntityDecoder[F, T], encoder: Encoder[T])
   extends CrudEndpoint[F, K, T, AuthEndpoint[F, User, Auth], Error, Params, SessionType]
@@ -28,7 +29,7 @@ case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, S
           case Right(params) =>
             jsonRequest[T](req.request, e => {
               implicit val session: SessionType = toSession(params, req.identity)
-              service.create(e).value.flatMap(f => jsonResponse(f))
+              service.create(e).value.flatMap(f => jsonResponse(f, errorHandler))
             })
         }
       }.toEither match {
@@ -46,7 +47,7 @@ case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, S
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params, req.identity)
-            service.get(toId(id)).value.flatMap(f => jsonResponse(f))
+            service.get(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
         }
       }.toEither match {
         case Left(err) =>
@@ -63,7 +64,7 @@ case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, S
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params, req.identity)
-            service.list().value.flatMap(f => jsonResponse(f))
+            service.list().value.flatMap(f => jsonResponse(f, errorHandler))
         }
       }.toEither match {
         case Left(err) =>
@@ -81,7 +82,7 @@ case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, S
           case Right(params) =>
             jsonRequest[T](req.request, e => {
               implicit val session: SessionType = toSession(params, req.identity)
-              service.update(e).value.flatMap(f => jsonResponse(f))
+              service.update(e).value.flatMap(f => jsonResponse(f, errorHandler))
             })
         }
       }.toEither match {
@@ -99,7 +100,7 @@ case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, S
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params, req.identity)
-            service.delete(toId(id)).value.flatMap(f => jsonResponse(f))
+            service.delete(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
         }
       }.toEither match {
         case Left(err) =>
@@ -116,7 +117,7 @@ case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, S
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params, req.identity)
-            service.size.value.flatMap(f => jsonResponse(f))
+            service.size.value.flatMap(f => jsonResponse(f, errorHandler))
         }
       }.toEither match {
         case Left(err) =>

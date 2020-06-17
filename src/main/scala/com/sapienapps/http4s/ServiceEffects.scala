@@ -46,7 +46,9 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
    * @tparam T - Entity Type
    * @return
    */
-  def jsonResponse[E, T](either: Either[E, T])(implicit encoder: Encoder[T], m: Monad[F]): F[Response[F]] =
+  def jsonResponse[E, T](either: Either[E, T],
+                         errorHandler: ErrorHandler[F, E])
+                        (implicit encoder: Encoder[T], m: Monad[F]): F[Response[F]] =
     either match {
       case Right(saved) =>
         saved match {
@@ -56,16 +58,15 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
           case _ => Ok(saved.asJson)
         }
       case Left(e) =>
-        BadRequest(e.toString)
+        errorHandler.handle(e)
       case e =>
         log.error(s"Unhandled Case Condition: ${e}")
         InternalServerError("Monitoring API Issue")
     }
 
-  def handleOptionalParam[D, T](
-                                 option: Option[data.ValidatedNel[ParseFailure, D]],
-                                 noneFun: () => T,
-                                 someFun: (D) => T
+  def handleOptionalParam[D, T](option: Option[data.ValidatedNel[ParseFailure, D]],
+                                noneFun: () => T,
+                                someFun: (D) => T
                                )(implicit encoder: Encoder[T], app: Applicative[F]): F[Response[F]] =
     option match {
       case None => Ok(noneFun().asJson)

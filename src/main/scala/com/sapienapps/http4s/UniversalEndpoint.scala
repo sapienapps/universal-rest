@@ -3,7 +3,7 @@ package com.sapienapps.http4s
 import cats.effect.Sync
 import cats.implicits._
 import io.circe.Encoder
-import org.http4s.{EntityDecoder, HttpRoutes, Request}
+import org.http4s.{EntityDecoder, HttpRoutes, Request, Response}
 import org.log4s.{Logger, getLogger}
 
 import scala.util.Try
@@ -11,6 +11,7 @@ import scala.util.Try
 case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
 (toParams: (Request[F]) => Either[String, Map[Params, _]],
  toSession: (Map[Params, _]) => SessionType,
+ errorHandler: ErrorHandler[F, Error],
  toId: (String) => K)
 (implicit ed: EntityDecoder[F, T], encoder: Encoder[T])
   extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Params, SessionType]
@@ -27,7 +28,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
             case Right(params) =>
               jsonRequest[T](req, e => {
                 implicit val session: SessionType = toSession(params)
-                service.create(e).value.flatMap(f => jsonResponse(f))
+                service.create(e).value.flatMap(f => jsonResponse(f, errorHandler))
               })
           }
         }.toEither match {
@@ -47,7 +48,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)
-              service.get(toId(id)).value.flatMap(f => jsonResponse(f))
+              service.get(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
           }
         }.toEither match {
           case Left(err) =>
@@ -66,7 +67,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)
-              service.list().value.flatMap(f => jsonResponse(f))
+              service.list().value.flatMap(f => jsonResponse(f, errorHandler))
           }
         }.toEither match {
           case Left(err) =>
@@ -86,7 +87,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
             case Right(params) =>
               jsonRequest[T](req, e => {
                 implicit val session: SessionType = toSession(params)
-                service.update(e).value.flatMap(f => jsonResponse(f))
+                service.update(e).value.flatMap(f => jsonResponse(f, errorHandler))
               })
           }
         }.toEither match {
@@ -106,7 +107,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)
-              service.delete(toId(id)).value.flatMap(f => jsonResponse(f))
+              service.delete(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
           }
         }.toEither match {
           case Left(err) =>
@@ -125,7 +126,7 @@ case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)
-              service.size.value.flatMap(f => jsonResponse(f))
+              service.size.value.flatMap(f => jsonResponse(f, errorHandler))
           }
         }.toEither match {
           case Left(err) =>
