@@ -1,14 +1,14 @@
 package com.sapienapps.http4s
 
 import cats.effect.{ConcurrentEffect, ContextShift, Timer}
+import com.sapienapps.http4s.test.{TestErrorHandler, TestRepo}
 import fs2.Stream
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits._
-import org.http4s.Status.BadRequest
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request, Status}
+import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request}
 
 import scala.concurrent.ExecutionContext.global
 
