@@ -1,12 +1,12 @@
 name := "universal-rest"
 
-version := "0.5.1"
+version := "0.5.2"
 
 scalaVersion := "2.12.11"
 
 val Http4sVersion  = "0.21.4"
 val CirceVersion   = "0.13.0"
-val TsecVersion = "0.2.0-M1"
+val TsecVersion = "0.2.1"
 
 libraryDependencies ++= Seq(
   "org.http4s"          %% "http4s-blaze-server" % Http4sVersion,
