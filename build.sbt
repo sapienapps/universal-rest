@@ -1,10 +1,10 @@
 name := "universal-rest"
 
-version := "0.5.2"
+version := "0.5.3"
 
 scalaVersion := "2.12.11"
 
-val Http4sVersion  = "0.21.4"
+val Http4sVersion  = "0.21.7"
 val CirceVersion   = "0.13.0"
 val TsecVersion = "0.2.1"
 
