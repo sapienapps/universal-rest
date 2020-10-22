@@ -11,7 +11,7 @@ import tsec.authentication._
 import scala.util.Try
 
 case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, SessionType]
-(toParams: (SecuredRequest[F, User, AugmentedJWT[Auth, String]]) => Either[String, Map[Params, _]],
+(toParams: (SecuredRequest[F, User, Auth]) => Either[String, Map[Params, _]],
  toSession: (Map[Params, _], User) => SessionType,
  errorHandler: ErrorHandler[F, Error],
  toId: (String) => K)
@@ -128,7 +128,7 @@ case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, S
   }
 
   def endpoints(service: Service,
-                auth: SecuredRequestHandler[F, String, User, AugmentedJWT[Auth, String]]): HttpRoutes[F] = {
+                auth: SecuredRequestHandler[F, String, User, Auth]): HttpRoutes[F] = {
     val authEndpoints: AuthService[F, User, Auth] = {
       val end = {
         count(service) orElse

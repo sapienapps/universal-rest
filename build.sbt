@@ -1,6 +1,6 @@
 name := "universal-rest"
 
-version := "0.5.3"
+version := "0.5.4"
 
 scalaVersion := "2.12.11"
 
