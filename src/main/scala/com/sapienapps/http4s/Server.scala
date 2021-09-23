@@ -1,21 +1,21 @@
 package com.sapienapps.http4s
 
-import cats.effect.{ConcurrentEffect, ContextShift, Timer}
 import com.sapienapps.http4s.test.{TestErrorHandler, TestRepo}
 import fs2.Stream
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
-import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits._
 import org.http4s.server.Router
-import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request}
 
 import scala.concurrent.ExecutionContext.global
+import cats.effect.{Async, Temporal}
+import org.http4s.blaze.client.BlazeClientBuilder
+import org.http4s.blaze.server.BlazeServerBuilder
 
 case class Server() {
 
-  def stream[F[_] : ConcurrentEffect](endpoints: List[(String, HttpRoutes[F])])
-                                     (implicit T: Timer[F], C: ContextShift[F]): Stream[F, Nothing] = {
+  def stream[F[_] : Async](endpoints: List[(String, HttpRoutes[F])])
+                          (implicit T: Temporal[F]): Stream[F, Nothing] = {
     implicit val entityDecoder: EntityDecoder[F, String] = jsonOf
     implicit val errorEncoder: EntityEncoder[F, String] = jsonEncoderOf
 
@@ -45,5 +45,4 @@ case class Server() {
         .serve
     } yield server
   }.drain
-
 }
