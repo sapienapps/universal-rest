@@ -1,14 +1,14 @@
 package com.sapienapps.http4s
 
-import cats.effect.Sync
+import cats.effect.Async
 import cats.implicits._
 import io.circe.Encoder
-import org.http4s.{EntityDecoder, HttpRoutes, Request, Response}
+import org.http4s.{EntityDecoder, HttpRoutes, Request}
 import org.log4s.{Logger, getLogger}
 
 import scala.util.Try
 
-case class UniversalEndpoint[F[_] : Sync, K, T, Error, Params, SessionType]
+case class UniversalEndpoint[F[_] : Async, K, T, Error, Params, SessionType]
 (toParams: (Request[F]) => Either[String, Map[Params, _]],
  toSession: (Map[Params, _]) => SessionType,
  errorHandler: ErrorHandler[F, Error],

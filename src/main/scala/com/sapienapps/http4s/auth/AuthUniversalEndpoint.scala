@@ -1,6 +1,6 @@
 package com.sapienapps.http4s.auth
 
-import cats.effect.Sync
+import cats.effect.Async
 import cats.implicits._
 import com.sapienapps.http4s.{CrudEndpoint, ErrorHandler, ServiceEffects}
 import io.circe.Encoder
@@ -10,7 +10,7 @@ import tsec.authentication._
 
 import scala.util.Try
 
-case class AuthUniversalEndpoint[F[_] : Sync, Auth, K, T, Error, Params, User, SessionType]
+case class AuthUniversalEndpoint[F[_] : Async, Auth, K, T, Error, Params, User, SessionType]
 (toParams: (SecuredRequest[F, User, Auth]) => Either[String, Map[Params, _]],
  toSession: (Map[Params, _], User) => SessionType,
  errorHandler: ErrorHandler[F, Error],
