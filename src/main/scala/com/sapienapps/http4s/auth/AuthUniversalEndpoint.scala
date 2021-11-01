@@ -117,7 +117,7 @@ case class AuthUniversalEndpoint[F[_] : Async, Auth, K, T, Error, Params, User, 
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params, req.identity)
-            service.size.value.flatMap(f => jsonResponse(f, errorHandler))
+            service.size().value.flatMap(f => jsonResponse(f, errorHandler))
         }
       }.toEither match {
         case Left(err) =>

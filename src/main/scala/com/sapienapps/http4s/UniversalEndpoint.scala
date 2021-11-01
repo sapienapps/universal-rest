@@ -126,7 +126,7 @@ case class UniversalEndpoint[F[_] : Async, K, T, Error, Params, SessionType]
             case Left(e) => BadRequest(e)
             case Right(params) =>
               implicit val session: SessionType = toSession(params)
-              service.size.value.flatMap(f => jsonResponse(f, errorHandler))
+              service.size().value.flatMap(f => jsonResponse(f, errorHandler))
           }
         }.toEither match {
           case Left(err) =>

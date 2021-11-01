@@ -7,7 +7,6 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, Request}
 
-import scala.concurrent.ExecutionContext.global
 import cats.effect.{Async, Temporal}
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server.BlazeServerBuilder
@@ -32,14 +31,14 @@ case class Server() {
     )
 
     for {
-      _ <- BlazeClientBuilder[F](global).stream
+      _ <- BlazeClientBuilder[F].stream
 
       // Base Routes:
       router = Router(
         endpoint: _*
       ).orNotFound
 
-      server <- BlazeServerBuilder[F](global)
+      server <- BlazeServerBuilder[F]
         .bindHttp(8080, "0.0.0.0")
         .withHttpApp(router)
         .serve
