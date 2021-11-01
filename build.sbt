@@ -1,10 +1,10 @@
 name := "universal-rest"
 
-version := "0.6.1"
+version := "0.7.0"
 
-scalaVersion := "2.12.15"
+scalaVersion := "2.13.6"
 
-val Http4sVersion  = "0.23.4"
+val Http4sVersion  = "0.23.6"
 val CirceVersion   = "0.14.1"
 val TsecVersion = "0.4.0"
 
@@ -31,6 +31,5 @@ scalacOptions ++= Seq(
   "-language:higherKinds",
   "-language:postfixOps",
   "-feature",
-  "-Ypartial-unification",
   "-Xfatal-warnings"
 )
