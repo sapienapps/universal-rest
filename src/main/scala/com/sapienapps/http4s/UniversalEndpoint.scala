@@ -8,13 +8,13 @@ import org.log4s.{Logger, getLogger}
 
 import scala.util.Try
 
-case class UniversalEndpoint[F[_] : Async, K, T, Error, Params, SessionType]
-(toParams: (Request[F]) => Either[String, Map[Params, _]],
- toSession: (Map[Params, _]) => SessionType,
+case class UniversalEndpoint[F[_] : Async, K, T, Error, ParamName, ParamValue, SessionType]
+(toParams: (Request[F]) => Either[String, Map[ParamName, ParamValue]],
+ toSession: (Map[ParamName, ParamValue]) => SessionType,
  errorHandler: ErrorHandler[F, Error],
  toId: (String) => K)
 (implicit ed: EntityDecoder[F, T], encoder: Encoder[T])
-  extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Params, SessionType]
+  extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Map[ParamName, ParamValue], SessionType]
     with ServiceEffects[F] {
 
   private val log: Logger = getLogger
