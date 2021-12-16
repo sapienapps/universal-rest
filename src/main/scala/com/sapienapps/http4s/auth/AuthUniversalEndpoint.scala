@@ -10,13 +10,13 @@ import tsec.authentication._
 
 import scala.util.Try
 
-case class AuthUniversalEndpoint[F[_] : Async, Auth, K, T, Error, Params, User, SessionType]
-(toParams: (SecuredRequest[F, User, Auth]) => Either[String, Map[Params, _]],
- toSession: (Map[Params, _], User) => SessionType,
+case class AuthUniversalEndpoint[F[_] : Async, Auth, K, T, Error, ParamName, ParamValue, User, SessionType]
+(toParams: SecuredRequest[F, User, Auth] => Either[String, Map[ParamName, ParamValue]],
+ toSession: (Map[ParamName, ParamValue], User) => SessionType,
  errorHandler: ErrorHandler[F, Error],
- toId: (String) => K)
+ toId: String => K)
 (implicit ed: EntityDecoder[F, T], encoder: Encoder[T])
-  extends CrudEndpoint[F, K, T, AuthEndpoint[F, User, Auth], Error, Params, SessionType]
+  extends CrudEndpoint[F, K, T, AuthEndpoint[F, User, Auth], Error,  Map[ParamName, ParamValue], SessionType]
     with ServiceEffects[F] {
 
   private val log: Logger = getLogger
