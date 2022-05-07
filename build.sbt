@@ -1,8 +1,8 @@
 name := "universal-rest"
 
-version := "0.7.2"
+version := "0.8.0"
 
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.8"
 
 val Http4sVersion  = "0.23.6"
 val CirceVersion   = "0.14.1"
@@ -23,6 +23,8 @@ libraryDependencies ++= Seq(
   "io.github.jmcardon" %% "tsec-jwt-sig" % TsecVersion,
   "io.github.jmcardon" %% "tsec-http4s" % TsecVersion,
 )
+
+addCompilerPlugin("org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full)
 
 scalacOptions ++= Seq(
   "-deprecation",
