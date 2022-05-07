@@ -18,16 +18,15 @@ import scala.util.Try
  * @param async$F$0 - Effect
  * @param ed - Entity Decoder
  * @param encoder - Entity Encoder
- * @tparam F
- * @tparam Auth
- * @tparam K
- * @tparam T
- * @tparam Error
- * @tparam ParamName
- * @tparam ParamValue
- * @tparam Context
+ * @tparam F - Tagless
+ * @tparam K - Key/ID Type of the Entity
+ * @tparam T - Entity Type
+ * @tparam Error - Error Type
+ * @tparam ParamName - ParamName Type
+ * @tparam ParamValue - ParamValue Type
+ * @tparam Context - Context (e.g., User, Session etc.)
  */
-case class AuthUniversalEndpointV3[F[_] : Async, Auth, K, T, Error, ParamName, ParamValue, Context]
+case class AuthUniversalEndpointV3[F[_] : Async, K, T, Error, ParamName, ParamValue, Context]
 (toParams: AuthedRequest[F, Context] => Either[String, Map[ParamName, ParamValue]],
  toSession: (Map[ParamName, ParamValue], Context) => Context,
  errorHandler: ErrorHandler[F, Error],
