@@ -15,7 +15,6 @@ import scala.util.Try
  * @param toSession - Kept for Backwards compatibility will be removed in V4
  * @param errorHandler - Error Function
  * @param toId - Id Function
- * @param async$F$0 - Effect
  * @param ed - Entity Decoder
  * @param encoder - Entity Encoder
  * @tparam F - Tagless
