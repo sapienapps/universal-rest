@@ -1,8 +1,12 @@
 name := "universal-rest"
 
 version := "0.8.2"
+organization := "com.sapienapps"
 
-scalaVersion := "2.13.8"
+githubOwner := "sapienapps"
+githubRepository := "universal-rest"
+
+scalaVersion := "2.13.10"
 
 val Http4sVersion  = "0.23.6"
 val CirceVersion   = "0.14.1"
