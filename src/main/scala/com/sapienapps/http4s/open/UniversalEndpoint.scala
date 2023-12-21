@@ -1,7 +1,8 @@
-package com.sapienapps.http4s
+package com.sapienapps.http4s.open
 
 import cats.effect.Async
 import cats.implicits._
+import com.sapienapps.http4s.{CrudEndpoint, ErrorHandler, ServiceEffects}
 import io.circe.Encoder
 import org.http4s.{EntityDecoder, HttpRoutes, Request}
 import org.log4s.{getLogger, Logger}

@@ -1,5 +1,3 @@
 package com
 
-package object sapienapps {
-
-}
+package object sapienapps {}

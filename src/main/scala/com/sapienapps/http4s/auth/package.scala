@@ -9,21 +9,6 @@ package object auth {
 
   type AuthEndpoint[F[_], Context] = PartialFunction[AuthedRequest[F, Context], F[Response[F]]]
 
-  object asAuthed {
-
-    /**
-     * Matcher for the http4s dsl
-     *
-     * @param ar
-     * @tparam F
-     * @tparam Context
-     * @return
-     */
-    def unapply[F[_], Context](ar: AuthedRequest[F, Context]): Option[(Request[F], Context)] =
-      Option(ar.req -> ar.context)
-
-  }
-
   case class User(id: Long, name: String)
 
   def authUserTest[F[_]: Applicative]: Kleisli[OptionT[F, *], Request[F], String] =
@@ -42,6 +27,25 @@ package object auth {
     } yield message
     val either = message.toOption
     OptionT.fromOption(either)
+  }
+
+}
+
+package auth {
+
+  object asAuthed {
+
+    /**
+     * Matcher for the http4s dsl
+     *
+     * @param ar 
+     * @tparam F
+     * @tparam Context
+     * @return
+     */
+    def unapply[F[_], Context](ar: AuthedRequest[F, Context]): Option[(Request[F], Context)] =
+      Option(ar.req -> ar.context)
+
   }
 
 }

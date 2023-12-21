@@ -1,23 +1,23 @@
 package com.sapienapps.http4s
 
-import cats.effect.{Async, Temporal}
+import cats.effect.Async
+import cats.effect.kernel.Resource
 import com.comcast.ip4s.IpLiteralSyntax
-import com.sapienapps.http4s.auth.{AuthUniversalEndpoint, authUserTest, customFailure}
+import com.sapienapps.http4s.auth.{authUserTest, customFailure, AuthUniversalEndpoint}
+import com.sapienapps.http4s.open.UniversalEndpoint
 import com.sapienapps.http4s.test.{TestErrorHandler, TestRepo}
 import fs2.io.net.Network
-import org.http4s.circe.{jsonEncoderOf, jsonOf}
+import org.http4s.circe.jsonOf
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.{AuthMiddleware, Router}
-import org.http4s.{AuthedRequest, EntityDecoder, EntityEncoder, HttpRoutes, Request}
+import org.http4s.{server, AuthedRequest, EntityDecoder, Request}
 
 case class Server() {
 
-  def stream[F[_] : Async: Network](endpoints: List[(String, HttpRoutes[F])])
-                          (implicit T: Temporal[F]) = {
+  def stream[F[_]: Async: Network](): Resource[F, server.Server] = {
     implicit val entityDecoder: EntityDecoder[F, String] = jsonOf
-    implicit val errorEncoder: EntityEncoder[F, String] = jsonEncoderOf
 
     val toParams = (_: Request[F]) => Right(Map[String, Any]())
     val toSession = (_: Map[String, Any]) => "Session"
@@ -29,16 +29,10 @@ case class Server() {
     val middleware = AuthMiddleware.noSpider(authUserTest, customFailure)
 
     val endpoint = List(
-      "test" -> UniversalEndpoint(
-        toParams,
-        toSession,
-        TestErrorHandler[F](),
-        toId).endpoints(UniversalService(TestRepo[F, String]())),
-      "test2" -> AuthUniversalEndpoint(
-        toParams2,
-        toSession2,
-        TestErrorHandler[F](),
-        toId).endpoints(UniversalService(TestRepo[F, String]()), middleware)
+      "test" -> UniversalEndpoint(toParams, toSession, TestErrorHandler[F](), toId)
+        .endpoints(UniversalService(TestRepo[F, String]())),
+      "test2" -> AuthUniversalEndpoint(toParams2, toSession2, TestErrorHandler[F](), toId)
+        .endpoints(UniversalService(TestRepo[F, String]()), middleware),
     )
 
     for {
@@ -46,7 +40,7 @@ case class Server() {
 
       // Base Routes:
       router = Router(
-        endpoint: _*
+        endpoint: _*,
       ).orNotFound
 
       server <- EmberServerBuilder
@@ -57,4 +51,5 @@ case class Server() {
         .build
     } yield server
   }
+
 }

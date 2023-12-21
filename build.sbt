@@ -1,12 +1,12 @@
 name := "universal-rest"
 
-version := "0.9.1"
+version := "0.9.2"
 organization := "com.sapienapps"
 
 githubOwner := "sapienapps"
 githubRepository := "universal-rest"
 
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.12"
 
 val Http4sVersion = "0.23.24"
 val CirceVersion = "0.14.6"
@@ -29,4 +29,14 @@ scalacOptions ++= Seq(
   "-language:postfixOps",
   "-feature",
   "-Xfatal-warnings",
+  "-Ywarn-unused"
+)
+
+inThisBuild(
+  List(
+    scalaVersion := "2.13.12",
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision,
+    scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
+  ),
 )

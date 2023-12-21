@@ -21,6 +21,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.SA_GITHUB_TOKEN }}
       run: sbt test
+    - name: Run scalafix and scalafmt
+      env:
+        GITHUB_TOKEN: ${{ secrets.SA_GITHUB_TOKEN }}
+      run: sbt "scalafix --check;scalafmtCheck"
     - name: Run publish
       if: success() && github.ref == 'refs/heads/master'
       env:
