@@ -2,7 +2,7 @@ package com.sapienapps.http4s
 
 import cats.effect.{Async, Temporal}
 import com.comcast.ip4s.IpLiteralSyntax
-import com.sapienapps.http4s.authV3.{AuthUniversalEndpointV3, authUserV3Test, customFailure}
+import com.sapienapps.http4s.auth.{AuthUniversalEndpoint, authUserTest, customFailure}
 import com.sapienapps.http4s.test.{TestErrorHandler, TestRepo}
 import fs2.io.net.Network
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
@@ -26,7 +26,7 @@ case class Server() {
     val toParams2 = (_: AuthedRequest[F, String]) => Right(Map[String, Any]())
     val toSession2 = (_: Map[String, Any], _: String) => "Session"
 
-    val middleware = AuthMiddleware.noSpider(authUserV3Test, customFailure)
+    val middleware = AuthMiddleware.noSpider(authUserTest, customFailure)
 
     val endpoint = List(
       "test" -> UniversalEndpoint(
@@ -34,7 +34,7 @@ case class Server() {
         toSession,
         TestErrorHandler[F](),
         toId).endpoints(UniversalService(TestRepo[F, String]())),
-      "test2" -> AuthUniversalEndpointV3(
+      "test2" -> AuthUniversalEndpoint(
         toParams2,
         toSession2,
         TestErrorHandler[F](),

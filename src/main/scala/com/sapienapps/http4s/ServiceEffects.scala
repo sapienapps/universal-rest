@@ -1,13 +1,13 @@
 package com.sapienapps.http4s
 
 import cats.implicits._
-import cats.{Applicative, Monad, MonadError, data}
+import cats.{data, Applicative, Monad, MonadError}
 import io.circe.Encoder
 import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, ParseFailure, Request, Response}
-import org.log4s.{Logger, getLogger}
+import org.log4s.{getLogger, Logger}
 
 trait ServiceEffects[F[_]] extends Http4sDsl[F] {
 
@@ -24,18 +24,18 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
    * @return
    */
   def jsonRequest[T](
-                      request: Request[F],
-                      fun: T => F[Response[F]]
-                    )(implicit decoder: EntityDecoder[F, T], F: MonadError[F, Throwable]): F[Response[F]] =
+    request: Request[F],
+    fun: T => F[Response[F]],
+  )(implicit decoder: EntityDecoder[F, T], F: MonadError[F, Throwable]): F[Response[F]] =
     request
       .as[T]
       .attempt
-      .flatMap({
+      .flatMap {
         case Right(saved) => fun(saved)
         case Left(e) =>
           log.error(e)("Request Issue")
           BadRequest(e.toString)
-      })
+      }
 
   /**
    * App Response Choke point for capturing the handling -> HTTP error JSON responses based on the ValidationError
@@ -46,9 +46,10 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
    * @tparam T - Entity Type
    * @return
    */
-  def jsonResponse[E, T](either: Either[E, T],
-                         errorHandler: ErrorHandler[F, E])
-                        (implicit encoder: Encoder[T], m: Monad[F]): F[Response[F]] =
+  def jsonResponse[E, T](either: Either[E, T], errorHandler: ErrorHandler[F, E])(implicit
+    encoder: Encoder[T],
+    m: Monad[F],
+  ): F[Response[F]] =
     either match {
       case Right(saved) =>
         saved match {
@@ -64,10 +65,11 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
         InternalServerError("Monitoring API Issue")
     }
 
-  def handleOptionalParam[D, T](option: Option[data.ValidatedNel[ParseFailure, D]],
-                                noneFun: () => T,
-                                someFun: (D) => T
-                               )(implicit encoder: Encoder[T], app: Applicative[F]): F[Response[F]] =
+  def handleOptionalParam[D, T](
+    option: Option[data.ValidatedNel[ParseFailure, D]],
+    noneFun: () => T,
+    someFun: (D) => T,
+  )(implicit encoder: Encoder[T], app: Applicative[F]): F[Response[F]] =
     option match {
       case None => Ok(noneFun().asJson)
       case Some(param) =>
@@ -76,8 +78,8 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
             err.map(e => log.warn(e.message))
             BadRequest("Unable to Parse parameter")
           },
-          id => Ok(someFun(id).asJson)
+          id => Ok(someFun(id).asJson),
         )
     }
-}
 
+}

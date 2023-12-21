@@ -18,12 +18,13 @@ trait CrudRepository[F[_], K, T, Error, SessionType] {
   def list()(implicit session: SessionType, F: Applicative[F]): EitherT[F, Error, Iterable[T]] =
     collection(isCount = false).map {
       case CountResult(_) => List[T]()
-      case ItrResult(v) => v
+      case ItrResult(v)   => v
     }
 
   def size()(implicit session: SessionType, F: Applicative[F]): EitherT[F, Error, Int] =
     collection(isCount = true).map {
       case CountResult(v) => v
-      case ItrResult(_)  => 0
+      case ItrResult(_)   => 0
     }
+
 }
