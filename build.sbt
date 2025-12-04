@@ -1,6 +1,6 @@
 name := "universal-rest"
 
-version := "0.9.2"
+version := "0.9.4"
 organization := "com.sapienapps"
 
 githubOwner := "sapienapps"
@@ -8,11 +8,11 @@ githubRepository := "universal-rest"
 
 scalaVersion := "2.13.12"
 
-val Http4sVersion = "0.23.24"
-val CirceVersion = "0.14.6"
-val MunitVersion = "1.0.0"
-val MunitCEVersion = "2.0.0"
-val Slf4jVersion = "2.0.9"
+val Http4sVersion = "0.23.33"
+val CirceVersion = "0.14.15"
+val MunitVersion = "1.2.1"
+val MunitCEVersion = "2.1.0"
+val Slf4jVersion = "2.0.17"
 
 libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-ember-server" % Http4sVersion,
