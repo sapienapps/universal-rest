@@ -78,9 +78,6 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
         }
       case Left(e) =>
         errorHandler.handle(e)
-      case e =>
-        log.error(s"Unhandled Case Condition: ${e}")
-        InternalServerError("Monitoring API Issue")
     }
 
   def handleOptionalParam[D, T](

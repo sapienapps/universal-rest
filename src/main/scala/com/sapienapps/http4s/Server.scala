@@ -2,7 +2,7 @@ package com.sapienapps.http4s
 
 import cats.effect.Async
 import cats.effect.kernel.Resource
-import com.comcast.ip4s.IpLiteralSyntax
+import com.comcast.ip4s._
 import com.sapienapps.http4s.auth.{authUserTest, customFailure, AuthUniversalEndpoint}
 import com.sapienapps.http4s.open.UniversalEndpoint
 import com.sapienapps.http4s.test.{TestErrorHandler, TestRepo}

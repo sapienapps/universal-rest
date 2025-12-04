@@ -21,7 +21,7 @@ Add to your `build.sbt`:
 ```scala
 resolvers += "GitHub Package Registry (sapienapps)" at "https://maven.pkg.github.com/sapienapps/universal-rest"
 
-libraryDependencies += "com.sapienapps" %% "universal-rest" % "0.9.4"
+libraryDependencies += "com.sapienapps" %% "universal-rest" % "0.9.6"
 ```
 
 ## Quick Start
@@ -149,10 +149,10 @@ CrudRepository (data access)
 
 ## Tech Stack
 
-- Scala 2.13
+- Scala 2.13 & Scala 3.3 LTS (cross-compiled)
 - http4s 0.23.x (Ember)
 - Circe (JSON)
-- Cats Effect
+- Cats Effect 3
 
 ## License
 

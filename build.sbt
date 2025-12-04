@@ -1,10 +1,13 @@
 name := "universal-rest"
 
-version := "0.9.6"
+version := "0.9.7"
 organization := "com.sapienapps"
 
 githubOwner := "sapienapps"
 githubRepository := "universal-rest"
+
+val Scala213 = "2.13.18"
+val Scala3 = "3.3.7"
 
 val Http4sVersion = "0.23.33"
 val CirceVersion = "0.14.15"
@@ -23,22 +26,41 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % Slf4jVersion % Test,
 )
 
-addCompilerPlugin("org.typelevel" % "kind-projector" % "0.13.4" cross CrossVersion.full)
+// kind-projector only for Scala 2
+libraryDependencies ++= {
+  if (scalaVersion.value.startsWith("2."))
+    Seq(compilerPlugin("org.typelevel" % "kind-projector" % "0.13.4" cross CrossVersion.full))
+  else
+    Seq.empty
+}
 
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-encoding",
-  "UTF-8",
-  "-language:higherKinds",
-  "-language:postfixOps",
-  "-feature",
-  "-Xfatal-warnings",
-  "-Ywarn-unused"
-)
+scalacOptions ++= {
+  if (scalaVersion.value.startsWith("2."))
+    Seq(
+      "-deprecation",
+      "-encoding",
+      "UTF-8",
+      "-language:higherKinds",
+      "-language:postfixOps",
+      "-feature",
+      "-Xfatal-warnings",
+      "-Ywarn-unused",
+    )
+  else
+    Seq(
+      "-deprecation",
+      "-encoding",
+      "UTF-8",
+      "-feature",
+      "-Xfatal-warnings",
+      "-Ykind-projector",
+    )
+}
 
 inThisBuild(
   List(
-    scalaVersion := "2.13.18",
+    scalaVersion := Scala213,
+    crossScalaVersions := Seq(Scala213, Scala3),
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision,
   ),
