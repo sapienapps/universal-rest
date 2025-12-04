@@ -43,7 +43,7 @@ case class AuthUniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue
   def create(service: Service): AuthEndpoint[F, Context] = { case req @ POST -> Root asAuthed _ =>
     safeRoute {
       toParams(req) match {
-        case Left(e) => BadRequest(e)
+        case Left(e)       => BadRequest(e)
         case Right(params) =>
           jsonRequest[T](
             req.req,
@@ -59,7 +59,7 @@ case class AuthUniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue
   def get(service: Service): AuthEndpoint[F, Context] = { case req @ GET -> Root / id asAuthed _ =>
     safeRoute {
       toParams(req) match {
-        case Left(e) => BadRequest(e)
+        case Left(e)       => BadRequest(e)
         case Right(params) =>
           implicit val session: Context = toSession(params, req.context)
           service.get(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
@@ -70,7 +70,7 @@ case class AuthUniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue
   def list(service: Service): AuthEndpoint[F, Context] = { case req @ GET -> Root asAuthed _ =>
     safeRoute {
       toParams(req) match {
-        case Left(e) => BadRequest(e)
+        case Left(e)       => BadRequest(e)
         case Right(params) =>
           implicit val session: Context = toSession(params, req.context)
           val queryParams = extractQueryParams(req)
@@ -82,7 +82,7 @@ case class AuthUniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue
   def update(service: Service): AuthEndpoint[F, Context] = { case req @ PUT -> Root asAuthed _ =>
     safeRoute {
       toParams(req) match {
-        case Left(e) => BadRequest(e)
+        case Left(e)       => BadRequest(e)
         case Right(params) =>
           jsonRequest[T](
             req.req,
@@ -98,7 +98,7 @@ case class AuthUniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue
   def delete(service: Service): AuthEndpoint[F, Context] = { case req @ DELETE -> Root / id asAuthed _ =>
     safeRoute {
       toParams(req) match {
-        case Left(e) => BadRequest(e)
+        case Left(e)       => BadRequest(e)
         case Right(params) =>
           implicit val session: Context = toSession(params, req.context)
           service.delete(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
@@ -109,7 +109,7 @@ case class AuthUniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue
   def count(service: Service): AuthEndpoint[F, Context] = { case req @ GET -> Root / "count" asAuthed _ =>
     safeRoute {
       toParams(req) match {
-        case Left(e) => BadRequest(e)
+        case Left(e)       => BadRequest(e)
         case Right(params) =>
           implicit val session: Context = toSession(params, req.context)
           service.size().value.flatMap(f => jsonResponse(f, errorHandler))

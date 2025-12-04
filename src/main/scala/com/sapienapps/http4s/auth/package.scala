@@ -21,8 +21,7 @@ package object auth {
 
   def authUser[F[_]: Applicative]: Kleisli[OptionT[F, *], Request[F], User] = Kleisli { request =>
     val message = for {
-      header <- request.headers.get[Authorization].toRight("Couldn't find an Authorization header")
-      token = header.credentials.toString()
+      _ <- request.headers.get[Authorization].toRight("Couldn't find an Authorization header")
       message <- Right(User(10, ""))
     } yield message
     val either = message.toOption

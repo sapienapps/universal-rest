@@ -50,7 +50,7 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
       .attempt
       .flatMap {
         case Right(saved) => fun(saved)
-        case Left(e) =>
+        case Left(e)      =>
           log.error(e)("Request Issue")
           BadRequest(e.toString)
       }
@@ -89,7 +89,7 @@ trait ServiceEffects[F[_]] extends Http4sDsl[F] {
     someFun: (D) => T,
   )(implicit encoder: Encoder[T], app: Applicative[F]): F[Response[F]] =
     option match {
-      case None => Ok(noneFun().asJson)
+      case None        => Ok(noneFun().asJson)
       case Some(param) =>
         param.fold(
           err => {

@@ -1,12 +1,10 @@
 name := "universal-rest"
 
-version := "0.9.5"
+version := "0.9.6"
 organization := "com.sapienapps"
 
 githubOwner := "sapienapps"
 githubRepository := "universal-rest"
-
-scalaVersion := "2.13.12"
 
 val Http4sVersion = "0.23.33"
 val CirceVersion = "0.14.15"
@@ -25,7 +23,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % Slf4jVersion % Test,
 )
 
-addCompilerPlugin("org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full)
+addCompilerPlugin("org.typelevel" % "kind-projector" % "0.13.4" cross CrossVersion.full)
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -40,9 +38,8 @@ scalacOptions ++= Seq(
 
 inThisBuild(
   List(
-    scalaVersion := "2.13.12",
+    scalaVersion := "2.13.18",
     semanticdbEnabled := true,
     semanticdbVersion := scalafixSemanticdb.revision,
-    scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
   ),
 )

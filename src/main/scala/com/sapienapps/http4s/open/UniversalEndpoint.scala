@@ -28,7 +28,7 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
     HttpRoutes.of[F] { case req @ POST -> Root =>
       safeRoute {
         toParams(req) match {
-          case Left(e) => BadRequest(e)
+          case Left(e)       => BadRequest(e)
           case Right(params) =>
             jsonRequest[T](
               req,
@@ -45,7 +45,7 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
     HttpRoutes.of[F] { case req @ GET -> Root / id =>
       safeRoute {
         toParams(req) match {
-          case Left(e) => BadRequest(e)
+          case Left(e)       => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
             service.get(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
@@ -57,7 +57,7 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
     HttpRoutes.of[F] { case req @ GET -> Root =>
       safeRoute {
         toParams(req) match {
-          case Left(e) => BadRequest(e)
+          case Left(e)       => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
             val queryParams = extractQueryParams(req)
@@ -70,7 +70,7 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
     HttpRoutes.of[F] { case req @ PUT -> Root =>
       safeRoute {
         toParams(req) match {
-          case Left(e) => BadRequest(e)
+          case Left(e)       => BadRequest(e)
           case Right(params) =>
             jsonRequest[T](
               req,
@@ -87,7 +87,7 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
     HttpRoutes.of[F] { case req @ DELETE -> Root / id =>
       safeRoute {
         toParams(req) match {
-          case Left(e) => BadRequest(e)
+          case Left(e)       => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
             service.delete(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
@@ -99,7 +99,7 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
     HttpRoutes.of[F] { case req @ GET -> Root / "count" =>
       safeRoute {
         toParams(req) match {
-          case Left(e) => BadRequest(e)
+          case Left(e)       => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
             service.size().value.flatMap(f => jsonResponse(f, errorHandler))
