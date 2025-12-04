@@ -20,8 +20,12 @@ jobs:
     - name: Set up sbt
       uses: sbt/setup-sbt@v1
     - name: Run tests
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: sbt test
     - name: Run scalafix and scalafmt check
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: sbt "scalafixAll --check" scalafmtCheckAll
     - name: Publish
       if: success() && github.ref == 'refs/heads/master'
