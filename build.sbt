@@ -12,6 +12,7 @@ val Http4sVersion = "0.23.24"
 val CirceVersion = "0.14.6"
 val MunitVersion = "1.0.0"
 val MunitCEVersion = "2.0.0"
+val Slf4jVersion = "2.0.9"
 
 libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-ember-server" % Http4sVersion,
@@ -21,6 +22,7 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % CirceVersion,
   "org.scalameta" %% "munit" % MunitVersion % Test,
   "org.typelevel" %% "munit-cats-effect" % MunitCEVersion % Test,
+  "org.slf4j" % "slf4j-simple" % Slf4jVersion % Test,
 )
 
 addCompilerPlugin("org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full)

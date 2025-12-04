@@ -5,9 +5,6 @@ import cats.implicits._
 import com.sapienapps.http4s.{CrudEndpoint, ErrorHandler, ServiceEffects}
 import io.circe.Encoder
 import org.http4s.{EntityDecoder, HttpRoutes, Request}
-import org.log4s.{getLogger, Logger}
-
-import scala.util.Try
 
 case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, SessionType](
   toParams: (Request[F]) => Either[String, Map[ParamName, ParamValue]],
@@ -18,11 +15,9 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
     extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Map[ParamName, ParamValue], SessionType]
     with ServiceEffects[F] {
 
-  private val log: Logger = getLogger
-
   def create(service: Service): HttpRoutes[F] =
     HttpRoutes.of[F] { case req @ POST -> Root =>
-      Try {
+      safeRoute {
         toParams(req) match {
           case Left(e) => BadRequest(e)
           case Right(params) =>
@@ -34,51 +29,36 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
               },
             )
         }
-      }.toEither match {
-        case Left(err) =>
-          log.error(err)("Unhandled Error")
-          BadRequest("Unknown Error")
-        case Right(r) => r
       }
     }
 
   def get(service: Service): HttpRoutes[F] =
     HttpRoutes.of[F] { case req @ GET -> Root / id =>
-      Try {
+      safeRoute {
         toParams(req) match {
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
             service.get(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
         }
-      }.toEither match {
-        case Left(err) =>
-          log.error(err)("Unhandled Error")
-          BadRequest("Unknown Error")
-        case Right(r) => r
       }
     }
 
   def list(service: Service): HttpRoutes[F] =
     HttpRoutes.of[F] { case req @ GET -> Root =>
-      Try {
+      safeRoute {
         toParams(req) match {
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
             service.list().value.flatMap(f => jsonResponse(f, errorHandler))
         }
-      }.toEither match {
-        case Left(err) =>
-          log.error(err)("Unhandled Error")
-          BadRequest("Unknown Error")
-        case Right(r) => r
       }
     }
 
   def update(service: Service): HttpRoutes[F] =
     HttpRoutes.of[F] { case req @ PUT -> Root =>
-      Try {
+      safeRoute {
         toParams(req) match {
           case Left(e) => BadRequest(e)
           case Right(params) =>
@@ -90,45 +70,30 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
               },
             )
         }
-      }.toEither match {
-        case Left(err) =>
-          log.error(err)("Unhandled Error")
-          BadRequest("Unknown Error")
-        case Right(r) => r
       }
     }
 
   def delete(service: Service): HttpRoutes[F] =
     HttpRoutes.of[F] { case req @ DELETE -> Root / id =>
-      Try {
+      safeRoute {
         toParams(req) match {
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
             service.delete(toId(id)).value.flatMap(f => jsonResponse(f, errorHandler))
         }
-      }.toEither match {
-        case Left(err) =>
-          log.error(err)("Unhandled Error")
-          BadRequest("Unknown Error")
-        case Right(r) => r
       }
     }
 
   def count(service: Service): HttpRoutes[F] =
     HttpRoutes.of[F] { case req @ GET -> Root / "count" =>
-      Try {
+      safeRoute {
         toParams(req) match {
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
             service.size().value.flatMap(f => jsonResponse(f, errorHandler))
         }
-      }.toEither match {
-        case Left(err) =>
-          log.error(err)("Unhandled Error")
-          BadRequest("Unknown Error")
-        case Right(r) => r
       }
     }
 
@@ -143,12 +108,3 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
   case class Count(count: Int)
 
 }
-
-/*
-object StringUniversalEndpoint {
-
-  def endpoints[F[_] : Sync, T](service: CrudService[F, String, T, Any, Any, Any])
-                               (implicit ed: EntityDecoder[F, T], e: Encoder[T]): HttpRoutes[F] =
-    new StringUniversalEndpoint[F, T](ed, e).endpoints(service)
-}
- */

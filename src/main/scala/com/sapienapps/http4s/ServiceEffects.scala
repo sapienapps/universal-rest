@@ -9,9 +9,27 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, ParseFailure, Request, Response}
 import org.log4s.{getLogger, Logger}
 
+import scala.util.Try
+
 trait ServiceEffects[F[_]] extends Http4sDsl[F] {
 
   private val log: Logger = getLogger
+
+  /**
+   * Wraps route logic in Try/catch to handle unexpected exceptions gracefully.
+   * Logs errors and returns BadRequest for unhandled exceptions.
+   *
+   * @param body - route logic that returns F[Response[F]]
+   * @param F    - Applicative for creating error response
+   * @return F[Response[F]]
+   */
+  def safeRoute(body: => F[Response[F]])(implicit F: Applicative[F]): F[Response[F]] =
+    Try(body).toEither match {
+      case Left(err) =>
+        log.error(err)("Unhandled Error")
+        BadRequest("Unknown Error")
+      case Right(r) => r
+    }
 
   /**
    * App Request Choke point for JSON Requests which handles decoding error condition
