@@ -134,4 +134,25 @@ class AuthUniversalEndpointSpec extends CatsEffectSuite {
     }
   }
 
+  test("GET / with pagination params works when authenticated") {
+    val request = Request[IO](Method.GET, uri"/?limit=10&offset=0").putHeaders(authHeader)
+    routes.orNotFound.run(request).flatMap { response =>
+      assertEquals(response.status, Status.Ok)
+      response.as[List[String]].map { body =>
+        assertEquals(body, List("Item0", "Item1"))
+      }
+    }
+  }
+
+  test("endpoints(repo, auth) convenience method works") {
+    val repoRoutes = endpoint.endpoints(repo, middleware)
+    val request = Request[IO](Method.GET, uri"/1").putHeaders(authHeader)
+    repoRoutes.orNotFound.run(request).flatMap { response =>
+      assertEquals(response.status, Status.Ok)
+      response.as[String].map { body =>
+        assertEquals(body, "Get 1")
+      }
+    }
+  }
+
 }

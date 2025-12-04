@@ -14,4 +14,23 @@ package object http4s {
     def isEmpty: Boolean = value == 0
   }
 
+  /**
+   * Query parameters for list operations supporting pagination and filtering.
+   *
+   * @param limit   Maximum number of results to return
+   * @param offset  Number of results to skip (for pagination)
+   * @param filters Key-value pairs for filtering results (implementation-specific)
+   */
+  case class QueryParams(
+    limit: Option[Int] = None,
+    offset: Option[Int] = None,
+    filters: Map[String, String] = Map.empty,
+  ) {
+    def isEmpty: Boolean = limit.isEmpty && offset.isEmpty && filters.isEmpty
+  }
+
+  object QueryParams {
+    val empty: QueryParams = QueryParams()
+  }
+
 }

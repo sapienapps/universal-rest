@@ -26,9 +26,9 @@ case class UniversalService[F[_], K, T, Error, SessionType](repo: CrudRepository
       deleted <- repo.delete(id)
     } yield deleted
 
-  def list()(implicit M: Monad[F], session: SessionType): EitherT[F, Error, Iterable[T]] =
+  def list(params: QueryParams)(implicit M: Monad[F], session: SessionType): EitherT[F, Error, Iterable[T]] =
     for {
-      list <- repo.list()
+      list <- repo.list(params)
     } yield list
 
   def size()(implicit M: Monad[F], session: SessionType): EitherT[F, Error, Int] =

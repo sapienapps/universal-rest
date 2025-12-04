@@ -2,7 +2,7 @@ package com.sapienapps.http4s.open
 
 import cats.effect.Async
 import cats.implicits._
-import com.sapienapps.http4s.{CrudEndpoint, ErrorHandler, ServiceEffects}
+import com.sapienapps.http4s._
 import io.circe.Encoder
 import org.http4s.{EntityDecoder, HttpRoutes, Request}
 
@@ -14,6 +14,15 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
 )(implicit ed: EntityDecoder[F, T], encoder: Encoder[T])
     extends CrudEndpoint[F, K, T, HttpRoutes[F], Error, Map[ParamName, ParamValue], SessionType]
     with ServiceEffects[F] {
+
+  private def extractQueryParams(req: Request[F]): QueryParams = {
+    val params = req.uri.query.params
+    QueryParams(
+      limit = params.get("limit").flatMap(_.toIntOption),
+      offset = params.get("offset").flatMap(_.toIntOption),
+      filters = params - "limit" - "offset",
+    )
+  }
 
   def create(service: Service): HttpRoutes[F] =
     HttpRoutes.of[F] { case req @ POST -> Root =>
@@ -51,7 +60,8 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
           case Left(e) => BadRequest(e)
           case Right(params) =>
             implicit val session: SessionType = toSession(params)
-            service.list().value.flatMap(f => jsonResponse(f, errorHandler))
+            val queryParams = extractQueryParams(req)
+            service.list(queryParams).value.flatMap(f => jsonResponse(f, errorHandler))
         }
       }
     }
@@ -104,6 +114,10 @@ case class UniversalEndpoint[F[_]: Async, K, T, Error, ParamName, ParamValue, Se
       list(service) <+>
       update(service) <+>
       delete(service)
+
+  /** Convenience method to create endpoints directly from a repository */
+  def endpoints(repo: CrudRepository[F, K, T, Error, SessionType]): HttpRoutes[F] =
+    endpoints(UniversalService(repo))
 
   case class Count(count: Int)
 

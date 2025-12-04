@@ -112,4 +112,35 @@ class UniversalEndpointSpec extends CatsEffectSuite {
     }
   }
 
+  test("GET / with limit param extracts pagination") {
+    val request = Request[IO](Method.GET, uri"/?limit=10&offset=5")
+    routes.orNotFound.run(request).flatMap { response =>
+      assertEquals(response.status, Status.Ok)
+      response.as[List[String]].map { body =>
+        assertEquals(body, List("Item0", "Item1"))
+      }
+    }
+  }
+
+  test("GET / with filter params extracts filters") {
+    val request = Request[IO](Method.GET, uri"/?status=active&type=user")
+    routes.orNotFound.run(request).flatMap { response =>
+      assertEquals(response.status, Status.Ok)
+      response.as[List[String]].map { body =>
+        assertEquals(body, List("Item0", "Item1"))
+      }
+    }
+  }
+
+  test("endpoints(repo) convenience method works") {
+    val repoRoutes = endpoint.endpoints(repo)
+    val request = Request[IO](Method.GET, uri"/1")
+    repoRoutes.orNotFound.run(request).flatMap { response =>
+      assertEquals(response.status, Status.Ok)
+      response.as[String].map { body =>
+        assertEquals(body, "Get 1")
+      }
+    }
+  }
+
 }

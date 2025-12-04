@@ -8,6 +8,7 @@ A Scala library for rapidly building type-safe CRUD REST APIs with http4s.
 
 - Composable CRUD endpoints with minimal boilerplate
 - Support for both open and authenticated routes
+- Pagination and filtering via query parameters
 - Tagless final design with Cats Effect
 - Functional error handling with `EitherT`
 - Built-in JSON serialization via Circe
@@ -20,7 +21,7 @@ Add to your `build.sbt`:
 ```scala
 resolvers += "GitHub Package Registry (sapienapps)" at "https://maven.pkg.github.com/sapienapps/universal-rest"
 
-libraryDependencies += "com.sapienapps" %% "universal-rest" % "1.0.0"
+libraryDependencies += "com.sapienapps" %% "universal-rest" % "0.9.4"
 ```
 
 ## Quick Start
@@ -38,6 +39,12 @@ case class UserRepo[F[_]: Applicative]() extends CrudRepository[F, String, User,
   def update(entity: User)(implicit session: Session): EitherT[F, AppError, User] = ???
   def delete(id: String)(implicit session: Session): EitherT[F, AppError, User] = ???
   def collection(isCount: Boolean)(implicit session: Session): EitherT[F, AppError, DataResult[User]] = ???
+
+  // Optional: Override for pagination/filtering support
+  override def collection(isCount: Boolean, params: QueryParams)(implicit session: Session) = {
+    // Use params.limit, params.offset, params.filters
+    ???
+  }
 }
 ```
 
@@ -69,7 +76,11 @@ val endpoint = UniversalEndpoint[IO, String, User, AppError, String, Any, Sessio
   toId = identity
 )
 
+// Using a service
 val routes: HttpRoutes[IO] = endpoint.endpoints(UniversalService(UserRepo[IO]()))
+
+// Or directly with a repository (convenience method)
+val routes: HttpRoutes[IO] = endpoint.endpoints(UserRepo[IO]())
 ```
 
 **Authenticated endpoints:**
@@ -85,31 +96,53 @@ val authEndpoint = AuthUniversalEndpoint[IO, String, User, AppError, String, Any
   toId = identity
 )
 
+// Using a service
 val authRoutes: HttpRoutes[IO] = authEndpoint.endpoints(
   UniversalService(UserRepo[IO]()),
   authMiddleware
 )
+
+// Or directly with a repository
+val authRoutes: HttpRoutes[IO] = authEndpoint.endpoints(UserRepo[IO](), authMiddleware)
 ```
 
 ## Generated Endpoints
 
 Each endpoint class generates the following routes:
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/` | Create entity |
-| GET | `/:id` | Get entity by ID |
-| GET | `/` | List all entities |
-| GET | `/count` | Get entity count |
-| PUT | `/` | Update entity |
-| DELETE | `/:id` | Delete entity by ID |
+| Method | Path | Description | Query Params |
+|--------|------|-------------|--------------|
+| POST | `/` | Create entity | - |
+| GET | `/:id` | Get entity by ID | - |
+| GET | `/` | List entities | `limit`, `offset`, custom filters |
+| GET | `/count` | Get entity count | - |
+| PUT | `/` | Update entity | - |
+| DELETE | `/:id` | Delete entity by ID | - |
+
+### Pagination & Filtering
+
+The list endpoint (`GET /`) automatically extracts query parameters:
+
+```
+GET /users?limit=10&offset=20&status=active&role=admin
+```
+
+These are passed to your repository as `QueryParams`:
+
+```scala
+case class QueryParams(
+  limit: Option[Int] = None,
+  offset: Option[Int] = None,
+  filters: Map[String, String] = Map.empty
+)
+```
 
 ## Architecture
 
 ```
 CrudEndpoint (HTTP routing)
     ↓
-CrudService (business logic)
+CrudService (business logic) ← optional, can use repo directly
     ↓
 CrudRepository (data access)
 ```
