@@ -8,24 +8,22 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up JDK 11
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v4
       with:
-        java-version: 11
+        java-version: '11'
+        distribution: 'temurin'
+    - name: Set up sbt
+      uses: sbt/setup-sbt@v1
     - name: Run tests
-      env:
-        GITHUB_TOKEN: ${{ secrets.SA_GITHUB_TOKEN }}
       run: sbt test
-    - name: Run scalafix and scalafmt
-      env:
-        GITHUB_TOKEN: ${{ secrets.SA_GITHUB_TOKEN }}
-      run: sbt "scalafix --check;scalafmtCheck"
-    - name: Run publish
+    - name: Run scalafix and scalafmt check
+      run: sbt "scalafixAll --check" scalafmtCheckAll
+    - name: Publish
       if: success() && github.ref == 'refs/heads/master'
       env:
         GITHUB_TOKEN: ${{ secrets.SA_GITHUB_TOKEN }}
